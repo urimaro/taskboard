@@ -49,6 +49,6 @@ test:
 #
 production:
   <<: *default
-  database: taskboard_production
-  username: taskboard
+  database: heroku_420c2f34fd6705b
+  username: b772b84082e2b1
   password: <%= ENV['TASKBOARD_DATABASE_PASSWORD'] %>
