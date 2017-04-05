@@ -38,6 +38,24 @@ class TasksController < ApplicationController
     @task.destroy
   end
 
+  def todo
+    @tasks = Task.where(status:"Todo")
+
+    render json: @tasks
+  end
+
+  def doing
+    @tasks = Task.where(status:"Doing")
+
+    render json: @tasks
+  end
+
+  def done
+    @tasks = Task.where(status:"done")
+
+    render json: @tasks
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_task
