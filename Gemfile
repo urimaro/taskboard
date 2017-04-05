@@ -25,12 +25,21 @@ gem 'puma', '~> 3.0'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
 
+group :test do
+  gem 'capybara'
+  gem 'database_cleaner'
+end
+
 group :development, :test do
   gem 'pry-byebug'
   gem 'pry-doc'
   gem 'pry-rails'
   gem 'pry-stack_explorer'
   gem 'rubocop'
+
+  gem 'rspec-rails', '~> 3.0'
+  gem 'factory_girl_rails'
+  gem 'faker'
 end
 group :development do
   gem 'listen', '~> 3.0.5'
