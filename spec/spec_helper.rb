@@ -116,5 +116,5 @@ end
 Capybara.configure do |config|
   config.run_server = false
   config.default_driver = :poltergeist
-  Capybara.app_host = 'http://localhost:3000/'
+  Capybara.app_host = 'https://taskbord.herokuapp.com/'
 end
