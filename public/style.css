@@ -2,7 +2,7 @@ body{
 	background: url("./background.jpg")
 }
 .swimlane{
-	width: 20em;/*幅はお好きなサイズに*/
+	width: 20em;
 	padding: 0 5em 0 5em ;
 	display: table-cell;
 }
