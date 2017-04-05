@@ -51,7 +51,7 @@ class TasksController < ApplicationController
   end
 
   def done
-    @tasks = Task.where(status:"done")
+    @tasks = Task.where(status:"Done")
 
     render json: @tasks
   end
