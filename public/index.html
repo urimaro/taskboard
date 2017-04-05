@@ -7,99 +7,45 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
 		<script type="text/babel">
 
-		// 通信用
-		function getData(url){
-			var req = new XMLHttpRequest();
-			req.onreadystatechange = function() {
-				if (this.readyState == 4) {
-					if (this.status == 200) {
-						console.log(this.response);
-					}else{
-									console.log("失敗["+this.status+"]");
-							}
-				}else{
-					console.log("通信中...");
-				}
-			};
-			req.open("GET" , "http://localhost:3000/tasks");
-			req.responseType = 'json';
-			req.send( null );
-		}
-
-		getData("");
-
-		// todo生成
+		// リスト生成
 		var TodoList = React.createClass({
-			getInitialState:function(){
-				return {}
+			componentDidMount: function(){
+				this.fetchData();
 			},
-      render: function() {
+			getInitialState: function(){
+				return {
+					datas: [
+						{id: 1, title: "データ無し"}
+					]
+				};
+			},
+			fetchData: function(){
+				fetch(this.props.dataPass)
+				.then((response) => response.json())
+				.then((responseData) => {
+					console.log(responseData);
+					this.setState({
+						datas: responseData,
+					});
+				})
+			},
+			render: function() {
 				var list =[];
-				var data = [
-					{ text: "画面設計書" },
-					{ text: "テスト仕様書" },
-					{ text: "見積もりの精度を上げる"}
-				];
+				var data = this.state.datas;
 				for(var i in data){
-					list.push(<div>{data[i].text}</div>);
+					list.push(<div>{data[i].title}</div>);
 				}
-        return (
+				return (
 					<div className="postit">
 						{list}
 					</div>
-        );
-      }
+				);
+			}
     });
 
-		// doing生成
-		var DoingList = React.createClass({
-			getInitialState:function(){
-				return {}
-			},
-			render: function() {
-				var list =[];
-				var data = [
-					{ text: "アプリケーション間関連設計資料作成" },
-					{ text: "ER図" },
-					{ text: "DB項目を洗い出す"}
-				];
-				for(var i in data){
-					list.push(<div>{data[i].text}</div>);
-				}
-				return (
-					<div className="postit">
-						{list}
-					</div>
-				);
-			}
-		});
-
-		// Done生成
-		var DoneList = React.createClass({
-			getInitialState:function(){
-				return {}
-			},
-			render: function() {
-				var list =[];
-				var data = [
-					{ text: "管理画面" },
-					{ text: "ハードウェア構成" },
-					{ text: "アカウント作成"}
-				];
-				for(var i in data){
-					list.push(<div>{data[i].text}</div>);
-				}
-				return (
-					<div className="postit">
-						{list}
-					</div>
-				);
-			}
-		});
-
-		ReactDOM.render(<TodoList />,document.getElementById('todo'));
-		ReactDOM.render(<DoingList />,document.getElementById('doing'));
-		ReactDOM.render(<DoneList />,document.getElementById('done'));
+		ReactDOM.render(<TodoList dataPass="todo"/>,document.getElementById('todo'));
+		ReactDOM.render(<TodoList dataPass="doing"/>,document.getElementById('doing'));
+		ReactDOM.render(<TodoList dataPass="done"/>,document.getElementById('done'));
 
 		</script>
 	</head>
