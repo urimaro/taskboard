@@ -5,34 +5,118 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+		<script type="text/babel">
+
+		// 通信用
+		function getData(url){
+			var req = new XMLHttpRequest();
+			req.onreadystatechange = function() {
+				if (this.readyState == 4) {
+					if (this.status == 200) {
+						console.log(this.response);
+					}else{
+									console.log("失敗["+this.status+"]");
+							}
+				}else{
+					console.log("通信中...");
+				}
+			};
+			req.open("GET" , "http://localhost:3000/tasks");
+			req.responseType = 'json';
+			req.send( null );
+		}
+
+		getData("");
+
+		// todo生成
+		var TodoList = React.createClass({
+			getInitialState:function(){
+				return {}
+			},
+      render: function() {
+				var list =[];
+				var data = [
+					{ text: "画面設計書" },
+					{ text: "テスト仕様書" },
+					{ text: "見積もりの精度を上げる"}
+				];
+				for(var i in data){
+					list.push(<div>{data[i].text}</div>);
+				}
+        return (
+					<div className="postit">
+						{list}
+					</div>
+        );
+      }
+    });
+
+		// doing生成
+		var DoingList = React.createClass({
+			getInitialState:function(){
+				return {}
+			},
+			render: function() {
+				var list =[];
+				var data = [
+					{ text: "アプリケーション間関連設計資料作成" },
+					{ text: "ER図" },
+					{ text: "DB項目を洗い出す"}
+				];
+				for(var i in data){
+					list.push(<div>{data[i].text}</div>);
+				}
+				return (
+					<div className="postit">
+						{list}
+					</div>
+				);
+			}
+		});
+
+		// Done生成
+		var DoneList = React.createClass({
+			getInitialState:function(){
+				return {}
+			},
+			render: function() {
+				var list =[];
+				var data = [
+					{ text: "管理画面" },
+					{ text: "ハードウェア構成" },
+					{ text: "アカウント作成"}
+				];
+				for(var i in data){
+					list.push(<div>{data[i].text}</div>);
+				}
+				return (
+					<div className="postit">
+						{list}
+					</div>
+				);
+			}
+		});
+
+		ReactDOM.render(<TodoList />,document.getElementById('todo'));
+		ReactDOM.render(<DoingList />,document.getElementById('doing'));
+		ReactDOM.render(<DoneList />,document.getElementById('done'));
+
+		</script>
 	</head>
 	<body>
 		<div class="swimlane">
 			<h1>Todo</h1>
-			<div class="postit">
-				<div>画面設計書</div>
-				<div>テスト仕様書</div>
-				<div>見積もりの精度を上げる</div>
-			</div>
+			<div id="todo"></div>
 		</div>
 
 		<div class="swimlane">
 			<h1>Doing</h1>
-			<div class="postit">
-				<div>アプリケーション間関連設計資料作成</div>
-				<div>ER図</div>
-				<div>DB項目を洗い出す
-				</div>
-			</div>
+			<div id="doing"></div>
 		</div>
 
 		<div class="swimlane">
 			<h1>Done</h1>
-			<div class="postit">
-				<div>管理画面</div>
-				<div>ハードウェア構成</div>
-				<div>アカウント作成</div>
-			</div>
+			<div id="done"></div>
 		</div>
 	</body>
 </html>
