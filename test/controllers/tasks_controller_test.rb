@@ -3,6 +3,8 @@ require 'test_helper'
 class TasksControllerTest < ActionDispatch::IntegrationTest
   setup do
     @task = tasks(:one)
+    @task.title = "Lorem ipsum dolor sit amet"
+    @task.status = "Todo"
   end
 
   test "should get index" do
@@ -24,7 +26,7 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update task" do
-    patch task_url(@task), params: { task: { status: @task.status, title: @task.title } }, as: :json
+    patch task_url(@task), params: { task: { status: "Doing", title: "Lorem ipsum" } }, as: :json
     assert_response 200
   end
 
