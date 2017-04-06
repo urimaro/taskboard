@@ -10,7 +10,7 @@
 		var Task = React.createClass({
 			render: function() {
 				return (
-					<div>
+					<div draggable="true">
 						{this.props.dataTaskTitle}
 						{this.props.children}
 					</div>
@@ -124,4 +124,47 @@
 		<div id="doing" class="swimlane"></div>
 		<div id="done"  class="swimlane"></div>
 	</body>
+
+	<script type="text/javascript">
+		function onDragOver(e){
+			e.preventDefault();
+		}
+
+		function onDrop(e){
+			console.log("clientX:" + e.clientX);
+			hitTest(e.clientX);
+
+			e.preventDefault();
+		}
+
+		function hitTest(posX){
+			var TODO_POS_X = 90;
+			var DOING_POS_X = 570;
+			var DONE_POS_X = 1050;
+			var WIDTH = 310
+
+			if(posX > TODO_POS_X && posX < (TODO_POS_X + WIDTH)){
+				alert("Todoエリアにドロップされた");
+				return;
+			}
+
+			if(posX > DOING_POS_X && posX < (DOING_POS_X + WIDTH)){
+				alert("Doingエリアにドロップされた");
+				return;
+			}
+
+			if(posX > DONE_POS_X && posX < (DONE_POS_X + WIDTH)){
+				alert("Doneエリアにドロップされた");
+				return;
+			}
+		}
+
+		document.getElementById('todo').addEventListener('dragover', onDragOver, false);
+		document.getElementById('doing').addEventListener('dragover', onDragOver, false);
+		document.getElementById('done').addEventListener('dragover', onDragOver, false);
+
+		document.getElementById('todo').addEventListener('drop', onDrop, false);
+		document.getElementById('doing').addEventListener('drop', onDrop, false);
+		document.getElementById('done').addEventListener('drop', onDrop, false);
+	</script>
 </html>
