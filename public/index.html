@@ -58,7 +58,7 @@
 							{this.state.datas.map((data) => {
 								return (
 									<Task dataTaskTitle={data.title}>
-										<input id={data.id} type="button" value="delete" onClick={this.deleteData}/>
+										<input id={data.id} className="delete" type="button" value="☓" onClick={this.deleteData}/>
 									</Task>
 								)
 							})}

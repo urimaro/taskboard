@@ -35,3 +35,12 @@ body{
 	box-shadow: 0 5px 5px rgba(0,0,0,0.3);
 	transform: rotate(2deg);
 }
+.delete{
+	width: 25px;
+	height: 25px;
+	background-color: #ffffcc;
+	border: none;
+	position: absolute;
+	top: 1em;
+	left: 26em;
+}
