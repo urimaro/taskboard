@@ -116,7 +116,7 @@ end
 Capybara.configure do |config|
   config.run_server = false
   config.default_driver = :selenium
-  Capybara.app_host = 'https://taskbord.herokuapp.com/'
+  Capybara.app_host = 'http://localhost:3000/'
 end
 Capybara.register_driver :selenium do |app|
   Capybara::Selenium::Driver.new(app, browser: :chrome)
