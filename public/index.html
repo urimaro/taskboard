@@ -25,9 +25,7 @@
 			},
 			getInitialState: function(){
 				return {
-					datas: [
-						{id: 1, title: "データ無し"}
-					]
+					datas: []
 				};
 			},
 			fetchData: function(){
@@ -50,7 +48,17 @@
 					});
 				})
 			},
+			createData: function(card_data){
+				var datas = this.state.datas;
+		    datas.push(card_data['card_data']);
+		    this.setState(datas);
+			},
 			render: function() {
+				let card_create_form = null;
+				if (this.props.dataType=="Todo") {
+					card_create_form = <CardCreateForm dataType={this.props.dataType} onEventCallBack={this.createData}/>
+				}
+
 				return (
 					<div>
 						<h1>{this.props.dataType}</h1>
@@ -58,15 +66,51 @@
 							{this.state.datas.map((data) => {
 								return (
 									<Task dataTaskTitle={data.title}>
-										<input id={data.id} className="delete" type="button" value="☓" onClick={this.deleteData}/>
+										<input id={data.id} type="button" value="delete" onClick={this.deleteData}/>
 									</Task>
 								)
 							})}
 						</div>
+						{card_create_form}
 					</div>
 				);
 			}
     });
+
+		var CardCreateForm = React.createClass({
+			getInitialState: function(){
+				return {
+					title: ""
+				};
+			},
+			changeTitle(e) {
+				this.setState({title: e.target.value});
+			},
+			sendCard(e) {
+				fetch('/tasks', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						title: this.state.title,
+						status: this.props.dataType,
+					})
+				}).then((response) => response.json())
+				.then((responseData) => {
+					this.props.onEventCallBack({ card_data : responseData });
+				})
+			},
+			render: function() {
+				return (
+					<form action="javascript:void(0)" onSubmit={this.sendCard}>
+						<div>{this.state.title}</div>
+						<input type="text" placeholder="内容" onChange={this.changeTitle} required/>
+						<input type="submit" value="追加"/>
+					</form>
+				);
+			}
+		});
 
 		ReactDOM.render(<TaskList dataPass="todo"  dataType="Todo"/>, document.getElementById('todo'));
 		ReactDOM.render(<TaskList dataPass="doing" dataType="Doing"/>,document.getElementById('doing'));
