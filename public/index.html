@@ -6,9 +6,20 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
 		<script type="text/babel">
+		// 付箋要素生成
+		var Task = React.createClass({
+			render: function() {
+				return (
+					<div>
+						{this.props.dataTaskTitle}
+						{this.props.children}
+					</div>
+				);
+			}
+		});
 
 		// リスト生成
-		var TodoList = React.createClass({
+		var TaskList = React.createClass({
 			componentDidMount: function(){
 				this.fetchData();
 			},
@@ -23,46 +34,49 @@
 				fetch(this.props.dataPass)
 				.then((response) => response.json())
 				.then((responseData) => {
-					console.log(responseData);
 					this.setState({
-						datas: responseData,
+						datas: responseData
+					});
+				})
+			},
+			deleteData(e){
+				var id  = e.currentTarget.getAttribute('id');
+				fetch('/tasks/' + id, {method: 'DELETE'})
+				.then((responseData) => {
+					this.setState({
+						datas: this.state.datas.filter((data) => {
+							return data.id != id;
+						})
 					});
 				})
 			},
 			render: function() {
-				var list =[];
-				var data = this.state.datas;
-				for(var i in data){
-					list.push(<div>{data[i].title}</div>);
-				}
 				return (
-					<div className="postit">
-						{list}
+					<div>
+						<h1>{this.props.dataType}</h1>
+						<div className="postit">
+							{this.state.datas.map((data) => {
+								return (
+									<Task dataTaskTitle={data.title}>
+										<input id={data.id} type="button" value="delete" onClick={this.deleteData}/>
+									</Task>
+								)
+							})}
+						</div>
 					</div>
 				);
 			}
     });
 
-		ReactDOM.render(<TodoList dataPass="todo"/>,document.getElementById('todo'));
-		ReactDOM.render(<TodoList dataPass="doing"/>,document.getElementById('doing'));
-		ReactDOM.render(<TodoList dataPass="done"/>,document.getElementById('done'));
+		ReactDOM.render(<TaskList dataPass="todo"  dataType="Todo"/>, document.getElementById('todo'));
+		ReactDOM.render(<TaskList dataPass="doing" dataType="Doing"/>,document.getElementById('doing'));
+		ReactDOM.render(<TaskList dataPass="done"  dataType="Done"/>, document.getElementById('done'));
 
 		</script>
 	</head>
 	<body>
-		<div class="swimlane">
-			<h1>Todo</h1>
-			<div id="todo"></div>
-		</div>
-
-		<div class="swimlane">
-			<h1>Doing</h1>
-			<div id="doing"></div>
-		</div>
-
-		<div class="swimlane">
-			<h1>Done</h1>
-			<div id="done"></div>
-		</div>
+		<div id="todo"  class="swimlane"></div>
+		<div id="doing" class="swimlane"></div>
+		<div id="done"  class="swimlane"></div>
 	</body>
 </html>
