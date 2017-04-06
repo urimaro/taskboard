@@ -44,3 +44,14 @@ body{
 	top: 1em;
 	left: 26em;
 }
+#sendCard{
+	font-size: 0.9em;
+	padding: 2em;
+	width: 24em;
+	height: 1em;
+	background: linear-gradient(to right, #ffffcc 0%, #f1f1c1 0.5%, #f1f1c1 13%, #ffffcc 16%);
+	border: none;
+	position: absolute;
+	top: 1em;
+	left: 0;
+}

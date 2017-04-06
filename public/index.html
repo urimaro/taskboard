@@ -70,8 +70,8 @@
 									</Task>
 								)
 							})}
+							{card_create_form}
 						</div>
-						{card_create_form}
 					</div>
 				);
 			}
@@ -104,11 +104,11 @@
 			},
 			render: function() {
 				return (
-					<form action="javascript:void(0)" onSubmit={this.sendCard}>
-						<div>{this.state.title}</div>
-						<input type="text" placeholder="内容" name="title" onChange={this.changeTitle} required/>
-						<input type="submit" value="追加"/>
-					</form>
+					<div>
+						<form action="javascript:void(0)" onSubmit={this.sendCard}>
+							<input type="text" id="sendCard" placeholder="Add" name="title" onChange={this.changeTitle} required/>
+						</form>
+					</div>
 				);
 			}
 		});
