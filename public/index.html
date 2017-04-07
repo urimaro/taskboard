@@ -17,56 +17,40 @@
 				);
 			}
 		});
-
 		// リスト生成
 		var TaskList = React.createClass({
-			componentDidMount: function(){
-				this.fetchData();
-			},
-			getInitialState: function(){
-				return {
-					datas: []
-				};
-			},
-			fetchData: function(){
-				fetch(this.props.dataPass)
-				.then((response) => response.json())
-				.then((responseData) => {
-					this.setState({
-						datas: responseData
-					});
-				})
+			createData: function(card_data){
+				this.props.onEventCallBackCreate(card_data);
+				return;
 			},
 			deleteData(e){
 				var id  = e.currentTarget.getAttribute('id');
-				fetch('/tasks/' + id, {method: 'DELETE'})
-				.then((responseData) => {
-					this.setState({
-						datas: this.state.datas.filter((data) => {
-							return data.id != id;
-						})
-					});
-				})
+				var status = e.currentTarget.getAttribute('data-status');
+				this.props.onEventCallBackDelete(id,status);
+				return;
 			},
-			createData: function(card_data){
-				var datas = this.state.datas;
-		    datas.push(card_data['card_data']);
-		    this.setState(datas);
+			updownData:function(e){
+				var id = e.currentTarget.getAttribute('data-id');
+				var type = e.currentTarget.getAttribute('data-type');
+				var status = e.currentTarget.getAttribute('data-status');
+				this.props.onEventCallBack(id,status,type);
+				return;
 			},
 			render: function() {
 				let card_create_form = null;
 				if (this.props.dataType=="Todo") {
 					card_create_form = <CardCreateForm dataType={this.props.dataType} onEventCallBack={this.createData}/>
 				}
-
 				return (
-					<div>
+					<div className="swimlane" id={this.props.dataType}>
 						<h1>{this.props.dataType}</h1>
 						<div className="postit">
-							{this.state.datas.map((data) => {
+							{this.props.dataPass.map((data) => {
 								return (
 									<Task dataTaskTitle={data.title}>
-										<input id={data.id} className="delete" type="button" value="☓" onClick={this.deleteData}/>
+										<input id={data.id} className="delete" type="button" value="☓" onClick={this.deleteData} data-status={data.status}/>
+										<input data-id={data.id} type="button" className="leftbutton"  value="←" onClick={this.updownData} data-status={data.status} data-type="down"/>
+										<input data-id={data.id} type="button" className="rightbutton" value="→" onClick={this.updownData} data-status={data.status} data-type="up"/>
 									</Task>
 								)
 							})}
@@ -112,17 +96,145 @@
 				);
 			}
 		});
+		var ListController = React.createClass({
+			componentDidMount: function(){
+				this.fetchData();
+			},
+			getInitialState: function(){
+				return {
+					todos: [],
+					doings:[],
+					dones:[]
+				};
+			},
+			fetchData: function(){
+				fetch("tasks")
+				.then((response) => response.json())
+				.then((responseData) => {
+					this.setState({
+						todos: responseData.filter((data) => {
+							return data.status == "Todo";
+						}),
+						doings:responseData.filter((data) => {
+							return data.status == "Doing";
+						}),
+						dones:responseData.filter((data) => {
+							return data.status == "Done";
+						})
+					});
+				})
+			},
+			deleteData(id,status){
+				fetch('/tasks/' + id, {method: 'DELETE'})
+				.then((responseData) => {
+					if(status == "Todo"){
+						this.setState({
+							todos: this.state.todos.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}else if(status == "Doing"){
+						this.setState({
+							doings: this.state.doings.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}else if(status == "Done"){
+						this.setState({
+							dones: this.state.dones.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}
+				})
+			},
+			createData: function(card_data){
+				var datas = this.state.todos;
+				datas.push(card_data['card_data']);
+				this.setState({todos:datas});
+			},
+			updateData:function(id,status,type){
+				var statusArray = ["Todo","Doing","Done"];
+				var i = statusArray.indexOf(status);
+				var datas = null;
 
-		ReactDOM.render(<TaskList dataPass="todo"  dataType="Todo"/>, document.getElementById('todo'));
-		ReactDOM.render(<TaskList dataPass="doing" dataType="Doing"/>,document.getElementById('doing'));
-		ReactDOM.render(<TaskList dataPass="done"  dataType="Done"/>, document.getElementById('done'));
+				if(type == "up"){
+					if(status != "Done")i++;
+				}else if(type == "down"){
+					if(status != "Todo")i--;
+				}
+
+				if(status == "Todo"){
+					datas = this.state.todos;
+					this.setState({
+						todos: datas.filter((data) => {
+							return data.id != id;
+						})
+					});
+				}
+				if(status == "Doing"){
+					datas = this.state.doings;
+					this.setState({
+						doings: datas.filter((data) => {
+							return data.id != id;
+						})
+					});
+				}
+				if(status == "Done"){
+					datas = this.state.dones;
+					this.setState({
+						dones: datas.filter((data) => {
+							return data.id != id;
+						})
+					});
+				}
+				status = statusArray[i];
+				fetch('/tasks/'+id, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						status: status,
+					})
+				})
+				.then((response) => response.json())
+				.then((responseData) => {
+					if(status == "Todo"){
+						datas = this.state.todos;
+						datas.push(responseData);
+						this.setState({todos:datas});
+					}else if(status == "Doing"){
+						datas = this.state.doings;
+						datas.push(responseData);
+						this.setState({doings:datas});
+					}else if(status == "Done"){
+						datas = this.state.dones;
+						datas.push(responseData);
+						this.setState({dones:datas});
+					}
+				})
+			},
+		 	render: function() {
+				return (
+					<div className="commentBox">
+						<TaskList dataPass={this.state.todos}  dataType="Todo"
+							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
+						<TaskList dataPass={this.state.doings}  dataType="Doing"
+							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
+						<TaskList dataPass={this.state.dones}  dataType="Done"
+							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
+					</div>
+				);
+			}
+		});
+
+		ReactDOM.render(<ListController />,document.getElementById('list'))
 
 		</script>
 	</head>
 	<body>
-		<div id="todo"  class="swimlane"></div>
-		<div id="doing" class="swimlane"></div>
-		<div id="done"  class="swimlane"></div>
+		<div id="list"></div>
 	</body>
 
 	<script type="text/javascript">
@@ -159,12 +271,12 @@
 			}
 		}
 
-		document.getElementById('todo').addEventListener('dragover', onDragOver, false);
-		document.getElementById('doing').addEventListener('dragover', onDragOver, false);
-		document.getElementById('done').addEventListener('dragover', onDragOver, false);
+		document.getElementById('Todo').addEventListener('dragover', onDragOver, false);
+		document.getElementById('Doing').addEventListener('dragover', onDragOver, false);
+		document.getElementById('Done').addEventListener('dragover', onDragOver, false);
 
-		document.getElementById('todo').addEventListener('drop', onDrop, false);
-		document.getElementById('doing').addEventListener('drop', onDrop, false);
-		document.getElementById('done').addEventListener('drop', onDrop, false);
+		document.getElementById('Todo').addEventListener('drop', onDrop, false);
+		document.getElementById('Doing').addEventListener('drop', onDrop, false);
+		document.getElementById('Done').addEventListener('drop', onDrop, false);
 	</script>
 </html>
