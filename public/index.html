@@ -49,9 +49,9 @@
 								return (
 									<Task dataTaskTitle={data.title}>
 										<input id={data.id} className="delete" type="button" value="☓" onClick={this.deleteData} data-status={data.status}/>
-										<input data-id={data.id} type="button" className="todobutton"  value="todo" onClick={this.updownData} data-status={data.status} data-type="Todo"/>
-										<input data-id={data.id} type="button" className="doingbutton" value="doing" onClick={this.updownData} data-status={data.status} data-type="Doing"/>
-										<input data-id={data.id} type="button" className="donebutton" value="done" onClick={this.updownData} data-status={data.status} data-type="Done"/>
+										<input id={"Todo_" + data.id} data-id={data.id} type="button" className="movebutton todobutton"  value="todo" onClick={this.updownData} data-status={data.status} data-type="Todo"/>
+										<input id={"Doing_" + data.id} data-id={data.id} type="button" className="movebutton doingbutton" value="doing" onClick={this.updownData} data-status={data.status} data-type="Doing"/>
+										<input id={"Done_" + data.id} data-id={data.id} type="button" className="movebutton donebutton" value="done" onClick={this.updownData} data-status={data.status} data-type="Done"/>
 									</Task>
 								)
 							})}
@@ -225,51 +225,65 @@
 		ReactDOM.render(<ListController />,document.getElementById('list'))
 
 		</script>
+
+		<script type="text/javascript">
+			function onDragstart(e){
+				e.dataTransfer.setData('text', e.target.children[0].id);	// ドラッグされた要素のIDをセットしておく
+			}
+
+			function onDragOver(e){
+				e.preventDefault();
+			}
+
+			function onDrop(e){
+				fromId = e.dataTransfer.getData('text');
+				var dropSwimLane = hitTest(fromId, e.clientX);
+				var nowSwimLane = document.getElementById(fromId).getAttribute("data-status")
+
+				if(dropSwimLane == nowSwimLane || dropSwimLane == "Other"){
+					e.preventDefault();
+					return;
+				}
+
+				document.getElementById(dropSwimLane + "_" + fromId).click();
+				e.preventDefault();
+			}
+
+			// 座標による当たり判定
+			function hitTest(id, posX){
+				var TODO_POS_X = 90;
+				var DOING_POS_X = 570;
+				var DONE_POS_X = 1050;
+				var WIDTH = 310
+
+				if(posX > TODO_POS_X && posX < (TODO_POS_X + WIDTH)){
+					return "Todo";
+				}
+				if(posX > DOING_POS_X && posX < (DOING_POS_X + WIDTH)){
+					return "Doing";
+				}
+				if(posX > DONE_POS_X && posX < (DONE_POS_X + WIDTH)){
+					return "Done";
+				}
+				return "Other";
+			}
+
+			window.onload = function () {
+				document.getElementById('Todo').addEventListener('dragstart', onDragstart, false);
+				document.getElementById('Doing').addEventListener('dragstart', onDragstart, false);
+				document.getElementById('Done').addEventListener('dragstart', onDragstart, false);
+
+				document.getElementById('Todo').addEventListener('dragover', onDragOver, false);
+				document.getElementById('Doing').addEventListener('dragover', onDragOver, false);
+				document.getElementById('Done').addEventListener('dragover', onDragOver, false);
+
+				document.getElementById('Todo').addEventListener('drop', onDrop, false);
+				document.getElementById('Doing').addEventListener('drop', onDrop, false);
+				document.getElementById('Done').addEventListener('drop', onDrop, false);
+			};
+		</script>
 	</head>
 	<body>
 		<div id="list"></div>
 	</body>
-
-	<script type="text/javascript">
-		function onDragOver(e){
-			e.preventDefault();
-		}
-
-		function onDrop(e){
-			console.log("clientX:" + e.clientX);
-			hitTest(e.clientX);
-
-			e.preventDefault();
-		}
-
-		function hitTest(posX){
-			var TODO_POS_X = 90;
-			var DOING_POS_X = 570;
-			var DONE_POS_X = 1050;
-			var WIDTH = 310
-
-			if(posX > TODO_POS_X && posX < (TODO_POS_X + WIDTH)){
-				alert("Todoエリアにドロップされた");
-				return;
-			}
-
-			if(posX > DOING_POS_X && posX < (DOING_POS_X + WIDTH)){
-				alert("Doingエリアにドロップされた");
-				return;
-			}
-
-			if(posX > DONE_POS_X && posX < (DONE_POS_X + WIDTH)){
-				alert("Doneエリアにドロップされた");
-				return;
-			}
-		}
-
-		document.getElementById('Todo').addEventListener('dragover', onDragOver, false);
-		document.getElementById('Doing').addEventListener('dragover', onDragOver, false);
-		document.getElementById('Done').addEventListener('dragover', onDragOver, false);
-
-		document.getElementById('Todo').addEventListener('drop', onDrop, false);
-		document.getElementById('Doing').addEventListener('drop', onDrop, false);
-		document.getElementById('Done').addEventListener('drop', onDrop, false);
-	</script>
 </html>
