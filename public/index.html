@@ -37,9 +37,9 @@
 				return;
 			},
 			render: function() {
-				let card_create_form = null;
+				let task_create_form = null;
 				if (this.props.dataType=="Todo") {
-					card_create_form = <CardCreateForm dataType={this.props.dataType} onEventCallBack={this.createData}/>
+					task_create_form = <TaskCreateForm dataType={this.props.dataType} onEventCallBack={this.createData}/>
 				}
 				return (
 					<div className="swimlane" id={this.props.dataType}>
@@ -55,14 +55,14 @@
 									</Task>
 								)
 							})}
-							{card_create_form}
+							{task_create_form}
 						</div>
 					</div>
 				);
 			}
     });
 
-		var CardCreateForm = React.createClass({
+		var TaskCreateForm = React.createClass({
 			getInitialState: function(){
 				return {
 					title: ""
@@ -71,7 +71,7 @@
 			changeTitle(e) {
 				this.setState({title: e.target.value});
 			},
-			sendCard(event) {
+			sendTask(event) {
 				event.target.title.value="";
 				fetch('/tasks', {
 					method: 'POST',
@@ -90,8 +90,8 @@
 			render: function() {
 				return (
 					<div>
-						<form action="javascript:void(0)" onSubmit={this.sendCard}>
-							<input type="text" id="sendCard" placeholder="Add" name="title" onChange={this.changeTitle} required/>
+						<form action="javascript:void(0)" onSubmit={this.sendTask}>
+							<input type="text" id="sendTask" placeholder="Add" name="title" onChange={this.changeTitle} required/>
 						</form>
 					</div>
 				);
