@@ -1,5 +1,6 @@
 body{
-	background: url("./background.jpg")
+	background: url("./background.jpg");
+	width: 1500px;
 }
 .swimlane{
 	width: 20em;
