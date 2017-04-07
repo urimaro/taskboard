@@ -6,33 +6,149 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
 		<script type="text/babel">
+    // TaskListのデータを取得・削除・追加・変更を管理する親要素
+		var ListController = React.createClass({
+			componentDidMount: function(){
+				this.fetchData();
+			},
+			getInitialState: function(){
+				return {
+					todos: [],
+					doings:[],
+					dones:[]
+				};
+			},
+			fetchData: function(){
+				fetch("tasks")
+				.then((response) => response.json())
+				.then((responseData) => {
+					this.setState({
+						// 取得したデータをTodo,Doing,Done毎にstateに格納
+						todos: responseData.filter((data) => {
+							return data.status == "Todo";
+						}),
+						doings:responseData.filter((data) => {
+							return data.status == "Doing";
+						}),
+						dones:responseData.filter((data) => {
+							return data.status == "Done";
+						})
+					});
+				})
+			},
+			deleteData(id,status){
+				fetch('/tasks/' + id, {method: 'DELETE'})
+				.then((responseData) => {
+          // stateで管理されているTodo,Doing,Doneリストから、削除したTaskを除去
+					if(status == "Todo"){
+						this.setState({
+							todos: this.state.todos.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}else if(status == "Doing"){
+						this.setState({
+							doings: this.state.doings.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}else if(status == "Done"){
+						this.setState({
+							dones: this.state.dones.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}
+				})
+			},
+			createData: function(card_data){
+				var datas = this.state.todos;
+				datas.push(card_data['card_data']);
+				this.setState({todos:datas});
+			},
+			updateData:function(id,status,type){
 
-		var Task = React.createClass({
+				fetch('/tasks/'+id, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						status: type,
+					})
+				})
+				.then((response) => response.json())
+				.then((responseData) => {
+					var datas = null;
+					// 移動する要素をリストから除去
+					if(status == "Todo"){
+						datas = this.state.todos;
+						this.setState({
+							todos: datas.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}else if(status == "Doing"){
+						datas = this.state.doings;
+						this.setState({
+							doings: datas.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}else if(status == "Done"){
+						datas = this.state.dones;
+						this.setState({
+							dones: datas.filter((data) => {
+								return data.id != id;
+							})
+						});
+					}
+					// 移動する要素を移動先のリストに追加
+					if(type == "Todo"){
+						datas = this.state.todos;
+						datas.push(responseData);
+						this.setState({todos:datas});
+					}else if(type == "Doing"){
+						datas = this.state.doings;
+						datas.push(responseData);
+						this.setState({doings:datas});
+					}else if(type == "Done"){
+						datas = this.state.dones;
+						datas.push(responseData);
+						this.setState({dones:datas});
+					}
+				})
+			},
 			render: function() {
 				return (
-					<div draggable="true">
-						{this.props.dataTaskTitle}
-						{this.props.children}
+					<div>
+						<TaskList dataPass={this.state.todos}  dataType="Todo"
+							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
+						<TaskList dataPass={this.state.doings}  dataType="Doing"
+							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
+						<TaskList dataPass={this.state.dones}  dataType="Done"
+							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
 					</div>
 				);
 			}
 		});
 
+		// Todo,Doing,Doneの付箋リストを作成する
 		var TaskList = React.createClass({
 			createData: function(card_data){
 				this.props.onEventCallBackCreate(card_data);
 				return;
 			},
 			deleteData(e){
-				var id     = e.currentTarget.getAttribute('id');
-				var status = e.currentTarget.getAttribute('data-status');
+				var id     = e.currentTarget.getAttribute('id');           // タスクのID
+        var status = e.currentTarget.getAttribute('data-status');  // タスクのステータス(Todo,Doing,Done)
 				this.props.onEventCallBackDelete(id,status);
 				return;
 			},
 			updownData:function(e){
-				var id = e.currentTarget.getAttribute('data-id');
-				var type = e.currentTarget.getAttribute('data-type');
-				var status = e.currentTarget.getAttribute('data-status');
+				var id     = e.currentTarget.getAttribute('data-id');     // タスクのID
+        var type   = e.currentTarget.getAttribute('data-type');   // タスクの変更後のステータス(Todo,Doing,Done)
+        var status = e.currentTarget.getAttribute('data-status'); // タスクの現在のステータス(Todo,Doing,Done)
 				this.props.onEventCallBack(id,status,type);
 				return;
 			},
@@ -61,7 +177,18 @@
 				);
 			}
     });
-
+		// 付箋単体の生成
+		var Task = React.createClass({
+			render: function() {
+				return (
+					<div draggable="true">
+						{this.props.dataTaskTitle}
+						{this.props.children}
+					</div>
+				);
+			}
+		});
+		// 付箋新規登録フォーム
 		var TaskCreateForm = React.createClass({
 			getInitialState: function(){
 				return {
@@ -93,130 +220,6 @@
 						<form action="javascript:void(0)" onSubmit={this.sendTask}>
 							<input type="text" id="sendTask" placeholder="Add" name="title" onChange={this.changeTitle} required/>
 						</form>
-					</div>
-				);
-			}
-		});
-
-		var ListController = React.createClass({
-			componentDidMount: function(){
-				this.fetchData();
-			},
-			getInitialState: function(){
-				return {
-					todos: [],
-					doings:[],
-					dones:[]
-				};
-			},
-			fetchData: function(){
-				fetch("tasks")
-				.then((response) => response.json())
-				.then((responseData) => {
-					this.setState({
-						todos: responseData.filter((data) => {
-							return data.status == "Todo";
-						}),
-						doings:responseData.filter((data) => {
-							return data.status == "Doing";
-						}),
-						dones:responseData.filter((data) => {
-							return data.status == "Done";
-						})
-					});
-				})
-			},
-			deleteData(id,status){
-				fetch('/tasks/' + id, {method: 'DELETE'})
-				.then((responseData) => {
-					if(status == "Todo"){
-						this.setState({
-							todos: this.state.todos.filter((data) => {
-								return data.id != id;
-							})
-						});
-					}else if(status == "Doing"){
-						this.setState({
-							doings: this.state.doings.filter((data) => {
-								return data.id != id;
-							})
-						});
-					}else if(status == "Done"){
-						this.setState({
-							dones: this.state.dones.filter((data) => {
-								return data.id != id;
-							})
-						});
-					}
-				})
-			},
-			createData: function(card_data){
-				var datas = this.state.todos;
-				datas.push(card_data['card_data']);
-				this.setState({todos:datas});
-			},
-			updateData:function(id,status,type){
-				var datas = null;
-
-				if(status == "Todo"){
-					datas = this.state.todos;
-					this.setState({
-						todos: datas.filter((data) => {
-							return data.id != id;
-						})
-					});
-				}
-				if(status == "Doing"){
-					datas = this.state.doings;
-					this.setState({
-						doings: datas.filter((data) => {
-							return data.id != id;
-						})
-					});
-				}
-				if(status == "Done"){
-					datas = this.state.dones;
-					this.setState({
-						dones: datas.filter((data) => {
-							return data.id != id;
-						})
-					});
-				}
-				fetch('/tasks/'+id, {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						status: type,
-					})
-				})
-				.then((response) => response.json())
-				.then((responseData) => {
-					if(type == "Todo"){
-						datas = this.state.todos;
-						datas.push(responseData);
-						this.setState({todos:datas});
-					}else if(type == "Doing"){
-						datas = this.state.doings;
-						datas.push(responseData);
-						this.setState({doings:datas});
-					}else if(type == "Done"){
-						datas = this.state.dones;
-						datas.push(responseData);
-						this.setState({dones:datas});
-					}
-				})
-			},
-		 	render: function() {
-				return (
-					<div>
-						<TaskList dataPass={this.state.todos}  dataType="Todo"
-							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
-						<TaskList dataPass={this.state.doings}  dataType="Doing"
-							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
-						<TaskList dataPass={this.state.dones}  dataType="Done"
-							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
 					</div>
 				);
 			}
