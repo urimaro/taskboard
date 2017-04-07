@@ -137,6 +137,49 @@
 
 		// Todo,Doing,Doneの付箋リストを作成する
 		var TaskList = React.createClass({
+			/*
+			* TaskList：Taskのドラッグ&ドロップ処理
+			*/
+			hitTest: function(id, posX){
+				var TODO_POS_X = 90;
+				var DOING_POS_X = 570;
+				var DONE_POS_X = 1050;
+				var WIDTH = 310
+
+				if(posX > TODO_POS_X && posX < (TODO_POS_X + WIDTH)){
+					return "Todo";
+				}
+				if(posX > DOING_POS_X && posX < (DOING_POS_X + WIDTH)){
+					return "Doing";
+				}
+				if(posX > DONE_POS_X && posX < (DONE_POS_X + WIDTH)){
+					return "Done";
+				}
+				return "Other";
+			},
+			onDragStart: function(e){
+				e.dataTransfer.setData('text', e.target.children[0].id);	// ドラッグされた要素のIDをセットしておく
+			},
+			onDragOver: function(e){
+				e.preventDefault();
+			},
+			onDrop: function(e){
+				var fromId = e.dataTransfer.getData('text');
+				var dropSwimLane = this.hitTest(fromId, e.clientX);
+				var nowSwimLane = document.getElementById(fromId).getAttribute("data-status")
+
+				if(dropSwimLane == nowSwimLane || dropSwimLane == "Other"){
+					e.preventDefault();
+					return;
+				}
+
+				document.getElementById(dropSwimLane + "_" + fromId).click();
+				e.preventDefault();
+			},
+
+			/*
+			* TaskList：CRUD
+			*/
 			createData: function(card_data){
 				this.props.onEventCallBackCreate(card_data);
 				return;
@@ -160,7 +203,7 @@
 					task_create_form = <TaskCreateForm dataType={this.props.dataType} onEventCallBack={this.createData}/>
 				}
 				return (
-					<div className="swimlane" id={this.props.dataType}>
+					<div className="swimlane" id={this.props.dataType} onDrop={this.onDrop} onDragOver={this.onDragOver} onDragStart={this.onDragStart} >
 						<h1>{this.props.dataType}</h1>
 						<div className="postit">
 							{this.props.dataPass.map((data) => {
@@ -229,63 +272,6 @@
 
 		ReactDOM.render(<ListController />,document.getElementById('list'))
 
-		</script>
-
-		<script type="text/javascript">
-			function onDragstart(e){
-				e.dataTransfer.setData('text', e.target.children[0].id);	// ドラッグされた要素のIDをセットしておく
-			}
-
-			function onDragOver(e){
-				e.preventDefault();
-			}
-
-			function onDrop(e){
-				fromId = e.dataTransfer.getData('text');
-				var dropSwimLane = hitTest(fromId, e.clientX);
-				var nowSwimLane = document.getElementById(fromId).getAttribute("data-status")
-
-				if(dropSwimLane == nowSwimLane || dropSwimLane == "Other"){
-					e.preventDefault();
-					return;
-				}
-
-				document.getElementById(dropSwimLane + "_" + fromId).click();
-				e.preventDefault();
-			}
-
-			// 座標による当たり判定
-			function hitTest(id, posX){
-				var TODO_POS_X = 90;
-				var DOING_POS_X = 570;
-				var DONE_POS_X = 1050;
-				var WIDTH = 310
-
-				if(posX > TODO_POS_X && posX < (TODO_POS_X + WIDTH)){
-					return "Todo";
-				}
-				if(posX > DOING_POS_X && posX < (DOING_POS_X + WIDTH)){
-					return "Doing";
-				}
-				if(posX > DONE_POS_X && posX < (DONE_POS_X + WIDTH)){
-					return "Done";
-				}
-				return "Other";
-			}
-
-			window.onload = function () {
-				document.getElementById('Todo').addEventListener('dragstart', onDragstart, false);
-				document.getElementById('Doing').addEventListener('dragstart', onDragstart, false);
-				document.getElementById('Done').addEventListener('dragstart', onDragstart, false);
-
-				document.getElementById('Todo').addEventListener('dragover', onDragOver, false);
-				document.getElementById('Doing').addEventListener('dragover', onDragOver, false);
-				document.getElementById('Done').addEventListener('dragover', onDragOver, false);
-
-				document.getElementById('Todo').addEventListener('drop', onDrop, false);
-				document.getElementById('Doing').addEventListener('drop', onDrop, false);
-				document.getElementById('Done').addEventListener('drop', onDrop, false);
-			};
 		</script>
 	</head>
 	<body>
