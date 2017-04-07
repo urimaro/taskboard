@@ -6,7 +6,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
 		<script type="text/babel">
-		// 付箋要素生成
+
 		var Task = React.createClass({
 			render: function() {
 				return (
@@ -17,14 +17,14 @@
 				);
 			}
 		});
-		// リスト生成
+
 		var TaskList = React.createClass({
 			createData: function(card_data){
 				this.props.onEventCallBackCreate(card_data);
 				return;
 			},
 			deleteData(e){
-				var id  = e.currentTarget.getAttribute('id');
+				var id     = e.currentTarget.getAttribute('id');
 				var status = e.currentTarget.getAttribute('data-status');
 				this.props.onEventCallBackDelete(id,status);
 				return;
@@ -49,8 +49,9 @@
 								return (
 									<Task dataTaskTitle={data.title}>
 										<input id={data.id} className="delete" type="button" value="☓" onClick={this.deleteData} data-status={data.status}/>
-										<input data-id={data.id} type="button" className="leftbutton"  value="←" onClick={this.updownData} data-status={data.status} data-type="down"/>
-										<input data-id={data.id} type="button" className="rightbutton" value="→" onClick={this.updownData} data-status={data.status} data-type="up"/>
+										<input data-id={data.id} type="button" className="todobutton"  value="todo" onClick={this.updownData} data-status={data.status} data-type="Todo"/>
+										<input data-id={data.id} type="button" className="doingbutton" value="doing" onClick={this.updownData} data-status={data.status} data-type="Doing"/>
+										<input data-id={data.id} type="button" className="donebutton" value="done" onClick={this.updownData} data-status={data.status} data-type="Done"/>
 									</Task>
 								)
 							})}
@@ -96,6 +97,7 @@
 				);
 			}
 		});
+
 		var ListController = React.createClass({
 			componentDidMount: function(){
 				this.fetchData();
@@ -154,15 +156,7 @@
 				this.setState({todos:datas});
 			},
 			updateData:function(id,status,type){
-				var statusArray = ["Todo","Doing","Done"];
-				var i = statusArray.indexOf(status);
 				var datas = null;
-
-				if(type == "up"){
-					if(status != "Done")i++;
-				}else if(type == "down"){
-					if(status != "Todo")i--;
-				}
 
 				if(status == "Todo"){
 					datas = this.state.todos;
@@ -188,27 +182,26 @@
 						})
 					});
 				}
-				status = statusArray[i];
 				fetch('/tasks/'+id, {
 					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
-						status: status,
+						status: type,
 					})
 				})
 				.then((response) => response.json())
 				.then((responseData) => {
-					if(status == "Todo"){
+					if(type == "Todo"){
 						datas = this.state.todos;
 						datas.push(responseData);
 						this.setState({todos:datas});
-					}else if(status == "Doing"){
+					}else if(type == "Doing"){
 						datas = this.state.doings;
 						datas.push(responseData);
 						this.setState({doings:datas});
-					}else if(status == "Done"){
+					}else if(type == "Done"){
 						datas = this.state.dones;
 						datas.push(responseData);
 						this.setState({dones:datas});
@@ -217,7 +210,7 @@
 			},
 		 	render: function() {
 				return (
-					<div className="commentBox">
+					<div>
 						<TaskList dataPass={this.state.todos}  dataType="Todo"
 							onEventCallBack={this.updateData} onEventCallBackDelete={this.deleteData} onEventCallBackCreate={this.createData}/>
 						<TaskList dataPass={this.state.doings}  dataType="Doing"
