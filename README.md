@@ -1,24 +1,42 @@
-# README
+## 使い方マニュアル
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+* かんたんな手順
+    1. Todoの一番下のAdd欄に入力EnterするとTodoにタスクが追加される
+    
+    2. TodoのタスクをDoingにドラッグ&ドロップ、同様にDoingからDoneに移動可能
+    
+    3. タスク右の'×'を押すと削除される
+    
+    
+## コードのメンバー担当
 
-Things you may want to cover:
+- heroku環境(八木)
 
-* Ruby version
+- デザイン(八木)
 
-* System dependencies
+- ドラッグ&ドロップ機能(八木, 田中)
 
-* Configuration
+- データフローの設計(田中)
 
-* Database creation
+- タスク取得表示(田中, 水沼)
 
-* Database initialization
+- タスク作成フォーム機能(水沼)
 
-* How to run the test suite
+- タスク削除機能(田中)
 
-* Services (job queues, cache servers, search engines, etc.)
 
-* Deployment instructions
+## 動作環境
 
-* ...
+* クラウド
+    - github
+    - heroku
+    
+* サーバー：
+    - rails5.0.2
+    - ruby2.4.0
+    - circleCI(herokuへの自動デプロイとテスト)
+    
+* フロント：
+    - react5.4.2
+    - babel-core5.8.23
+    - Selenium
